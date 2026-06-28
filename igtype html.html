@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>igtype</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f11;
+      --surface: #17171a;
+      --surface-2: #1e1e22;
+      --border: #2a2a30;
+      --border-strong: #3a3a42;
+      --text-primary: #f0f0f2;
+      --text-secondary: #9090a0;
+      --text-muted: #555560;
+      --accent: #00A89D;
+      --accent-bg: rgba(0,168,157,0.12);
+      --accent-border: rgba(0,168,157,0.35);
+      --success: #4ade80;
+      --success-bg: rgba(74,222,128,0.1);
+      --danger: #f87171;
+      --danger-bg: rgba(248,113,113,0.12);
+      --warning: #fbbf24;
+      --font: 'Inter', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --radius: 8px;
+      --radius-lg: 14px;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    /* ── Layout ── */
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 28px;
+      border-bottom: 0.5px solid var(--border);
+      background: var(--surface);
+    }
+
+    .logo {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text-primary);
+      letter-spacing: -0.5px;
+    }
+
+    .logo em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .best-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: var(--surface-2);
+      border: 0.5px solid var(--border-strong);
+      padding: 5px 12px;
+      border-radius: 99px;
+    }
+
+    .best-badge span {
+      color: var(--warning);
+      font-weight: 500;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 640px;
+    }
+
+    /* ── Screens ── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── Start Screen ── */
+    .start-hero {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .start-hero h1 {
+      font-family: var(--mono);
+      font-size: 48px;
+      font-weight: 500;
+      letter-spacing: -2px;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .start-hero h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .start-hero p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .section-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .option-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 2rem;
+    }
+
+    .option-btn {
+      flex: 1;
+      padding: 11px 0;
+      background: var(--surface);
+      border: 0.5px solid var(--border-strong);
+      border-radius: var(--radius);
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .option-btn:hover { border-color: var(--accent-border); color: var(--text-primary); }
+
+    .option-btn.active {
+      background: var(--accent-bg);
+      border-color: var(--accent-border);
+      color: var(--accent);
+    }
+
+    .start-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 500;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .start-btn:hover { opacity: 0.9; }
+    .start-btn:active { transform: scale(0.99); }
+
+    /* ── Game Screen ── */
+    .game-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .timer-display {
+      font-family: var(--mono);
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--text-primary);
+      min-width: 56px;
+    }
+
+    .timer-display.urgent { color: var(--danger); }
+
+    .progress-wrap {
+      flex: 1;
+      margin: 0 16px;
+      background: var(--surface-2);
+      border-radius: 99px;
+      height: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 99px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .live-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .live-stat {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+    }
+
+    .live-stat .lbl {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    .live-stat .val {
+      font-family: var(--mono);
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .live-stat .val.blue { color: var(--accent); }
+    .live-stat .val.green { color: var(--success); }
+
+    .sentence-display {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 14px;
+      font-size: 18px;
+      line-height: 1.8;
+      font-family: var(--mono);
+      letter-spacing: 0.01em;
+      min-height: 90px;
+      word-break: keep-all;
+    }
+
+    .sentence-display .ch { transition: color 0.05s; }
+    .sentence-display .ch.correct { color: var(--success); }
+    .sentence-display .ch.wrong { color: var(--danger); background: var(--danger-bg); border-radius: 2px; }
+    .sentence-display .ch.pending { color: var(--text-muted); }
+    .sentence-display .cursor-char { border-left: 2px solid var(--accent); animation: blink 0.9s ease infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    .typing-area {
+      width: 100%;
+      padding: 13px 16px;
+      background: var(--surface);
+      border: 0.5px solid var(--border-strong);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-size: 16px;
+      font-family: var(--mono);
+      outline: none;
+      transition: border-color 0.15s;
+      caret-color: var(--accent);
+    }
+
+    .typing-area:focus { border-color: var(--accent-border); }
+    .typing-area.error { border-color: rgba(248,113,113,0.5); }
+
+    .hint {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* ── Result Screen ── */
+    .result-top {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .result-top .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 99px;
+      margin-bottom: 12px;
+    }
+
+    .badge.record {
+      background: rgba(251,191,36,0.12);
+      color: var(--warning);
+      border: 0.5px solid rgba(251,191,36,0.3);
+    }
+
+    .badge.normal {
+      background: var(--surface-2);
+      color: var(--text-secondary);
+      border: 0.5px solid var(--border);
+    }
+
+    .result-top h2 {
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .result-top p { font-size: 13px; color: var(--text-muted); }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .result-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+    }
+
+    .result-card .lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .result-card .big {
+      font-family: var(--mono);
+      font-size: 36px;
+      font-weight: 500;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .result-card .big.blue { color: var(--accent); }
+    .result-card .big.green { color: var(--success); }
+    .result-card small { font-size: 12px; color: var(--text-muted); }
+
+    .chart-box {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      margin-bottom: 16px;
+    }
+
+    .chart-box .lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 56px;
+    }
+
+    .bar-item {
+      flex: 1;
+      border-radius: 3px 3px 0 0;
+      background: var(--surface-2);
+      min-height: 4px;
+      transition: background 0.2s;
+    }
+
+    .bar-item.active { background: var(--accent); }
+
+    .result-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .result-btns button {
+      flex: 1;
+      padding: 12px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+    }
+
+    .btn-primary:hover { opacity: 0.9; }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 0.5px solid var(--border-strong);
+    }
+
+    .btn-ghost:hover { background: var(--surface-2); color: var(--text-primary); }
+
+    /* ── Responsive ── */
+    @media (max-width: 520px) {
+      .nav { padding: 14px 16px; }
+      .start-hero h1 { font-size: 36px; }
+      .sentence-display { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <nav class="nav">
+    <div class="logo">ig<em>type</em></div>
+    <div class="best-badge" id="bestBadge">
+      🏆 베스트 <span id="bestDisplay">—</span>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container">
+
+      <!-- ① 시작 화면 -->
+      <div class="screen active" id="screenStart">
+        <div class="start-hero">
+          <h1>ig<em>type</em></h1>
+          <p>타이핑 속도와 정확도를 측정해보세요</p>
+        </div>
+
+        <div class="section-label">언어</div>
+        <div class="option-row" id="langRow">
+          <button class="option-btn active" data-lang="ko">🇰🇷 한국어</button>
+          <button class="option-btn" data-lang="en">🇺🇸 English</button>
+        </div>
+
+        <div class="section-label">난이도</div>
+        <div class="option-row" id="diffRow">
+          <button class="option-btn active" data-diff="easy">쉬움</button>
+          <button class="option-btn" data-diff="normal">보통</button>
+          <button class="option-btn" data-diff="hard">어려움</button>
+          <button class="option-btn" data-diff="veryhard">💀 최상</button>
+        </div>
+
+        <button class="start-btn" id="startBtn">시작하기</button>
+      </div>
+
+      <!-- ② 게임 화면 -->
+      <div class="screen" id="screenGame">
+        <div class="game-header">
+          <div class="timer-display" id="timerDisplay">2:00</div>
+          <div class="progress-wrap">
+            <div class="progress-fill" id="progressFill" style="width:0%"></div>
+          </div>
+          <div class="progress-text" id="progressText">0 / 10</div>
+        </div>
+
+        <div class="live-stats">
+          <div class="live-stat">
+            <div class="lbl">WPM</div>
+            <div class="val blue" id="liveWpm">0</div>
+          </div>
+          <div class="live-stat">
+            <div class="lbl">정확도</div>
+            <div class="val green" id="liveAcc">100%</div>
+          </div>
+          <div class="live-stat">
+            <div class="lbl">진행</div>
+            <div class="val" id="liveSentence">1/10</div>
+          </div>
+        </div>
+
+        <div class="sentence-display" id="sentenceDisplay"></div>
+        <input class="typing-area" id="typingInput" placeholder="여기에 입력하세요…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+        <div class="hint" id="gameHint">문장을 완성하면 자동으로 넘어갑니다</div>
+      </div>
+
+      <!-- ③ 결과 화면 -->
+      <div class="screen" id="screenResult">
+        <div class="result-top">
+          <div class="badge" id="resultBadge">🎉 신기록!</div>
+          <h2>결과</h2>
+          <p id="resultSub">한국어 · 보통 난이도</p>
+        </div>
+
+        <div class="result-grid">
+          <div class="result-card">
+            <div class="lbl" id="wpmLabel">WPM</div>
+            <div class="big blue" id="resultWpm">0</div>
+            <small id="resultWpmSub"></small>
+          </div>
+          <div class="result-card">
+            <div class="lbl">정확도</div>
+            <div class="big green" id="resultAcc">0%</div>
+            <small id="resultAccSub"></small>
+          </div>
+          <div class="result-card">
+            <div class="lbl">소요 시간</div>
+            <div class="big" id="resultTime">0:00</div>
+            <small id="resultTimeSub"></small>
+          </div>
+          <div class="result-card">
+            <div class="lbl" id="speedLabel">타수 (타/분)</div>
+            <div class="big" id="resultSpeed">0</div>
+            <small id="resultSpeedSub"></small>
+          </div>
+        </div>
+
+        <div class="chart-box">
+          <div class="lbl">문장별 속도</div>
+          <div class="bars" id="wpmBars"></div>
+        </div>
+
+        <div class="result-btns">
+          <button class="btn-primary" id="retryBtn">다시하기</button>
+          <button class="btn-ghost" id="backBtn">설정 바꾸기</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+// ── 문장 데이터 ──────────────────────────────────────────────
+const SENTENCES = {
+  ko: {
+    easy: [
+      "오늘 날씨가 참 맑고 좋습니다.",
+      "사과와 배는 맛있는 과일입니다.",
+      "고양이가 창문 옆에서 자고 있어요.",
+      "매일 아침 물 한 잔을 마시세요.",
+      "도서관에서 조용히 책을 읽었습니다.",
+      "봄이 오면 꽃이 피기 시작합니다.",
+      "오늘 점심은 비빔밥을 먹었어요.",
+      "강아지가 공원에서 뛰어놀고 있습니다.",
+      "새 학기가 시작되어 설렙니다.",
+      "저녁에 친구들과 영화를 봤어요.",
+    ],
+    normal: [
+      "하늘을 나는 새처럼 자유롭게 세상을 바라보고 싶다.",
+      "끊임없는 노력과 인내가 성공의 열쇠가 된다.",
+      "가을 단풍이 물든 산길을 천천히 걸어 올라갔다.",
+      "새벽 공기는 차갑지만 그 맑음이 하루를 상쾌하게 한다.",
+      "오래된 책 속에서 잊혀진 이야기들이 살아 숨쉰다.",
+      "빗소리를 들으며 따뜻한 차 한 잔을 마시는 오후.",
+      "첫 눈이 내리던 날 우리는 처음 만났었다.",
+      "노을이 지는 바닷가에서 파도 소리를 듣고 있다.",
+      "지금 이 순간이 가장 소중한 시간임을 알고 있다.",
+      "작은 친절이 모여 세상을 더 따뜻하게 만든다.",
+    ],
+    hard: [
+      "무한한 우주의 섭리 앞에서 인간의 존재는 얼마나 작고 경이로운가.",
+      "빠르게 변화하는 사회에서 창의적 사고와 비판적 분석 능력이 핵심 역량으로 부각된다.",
+      "철학적 탐구는 자명해 보이는 것들에 의문을 제기하는 데서 시작된다.",
+      "언어는 단순한 의사소통 수단을 넘어 사고 방식과 세계관을 형성하는 도구다.",
+      "기술의 발전이 인류에게 가져다준 혜택과 그에 따른 윤리적 딜레마는 공존한다.",
+      "역사는 승자에 의해 기록되지만 그 이면에는 수많은 목소리들이 잠들어 있다.",
+      "예술 작품의 진정한 가치는 시대와 문화를 초월하여 인간의 감정에 공명할 때 발현된다.",
+      "지속 가능한 발전을 위해서는 경제 성장과 환경 보전의 균형이 반드시 필요하다.",
+      "인공지능의 급속한 발전은 노동 시장의 구조적 변화와 새로운 기회를 동시에 창출한다.",
+      "민주주의는 완벽하지 않지만 인류가 발견한 가장 나은 통치 체제 중 하나임은 분명하다.",
+    ],
+    veryhard: [
+      "스위스에서 온 산새들이 속삭이는 산림 숲속에서 숫사슴을 샅샅이 수색해 식사하고 산속 샘물로 세수하며 사는 삼십삼살 샴쌍둥이 미세스 스미스씨와 미스터 심슨씨는, 삼성 설립 사장의 회사 자산 상속자인 사촌의 사돈 김상속 씨의 숫기있고 송글송글한 숫색시 삼성 소속 식산업 종사자 김삼순씨를 만나서, 삼성 수산물 운송 수송 수색 실장에게 스위스에서 숫사슴을 샅샅이 수색했던 것을 인정받아 스위스 수산물 운송 수송 과정에서, 상해 삭힌 냄새가 나는 수산물을 수색해내는 삼성 소속 수산물 운송 수송 수색사원이 돼서 살신성인으로 쉴새없이 수색하다 산성수에 손이 산화되어 수술실에서 수술하게 됐는데, 쉽사리 수술이 잘 안 돼서 심신에 좋은 산삼을 달여 츄르릅 들이켰더니 힘이 샘솟아 다시 몸사려 수색하다. 삼성 소속 식산업 종사자 김삼순씨와 셋이서 삼삼오오 삼월 삼십삼 일 세시 삼십삼분 삼십삼초에 쉰세살 김식사씨네 시내 스시 식당에 식사하러 가서, 싱싱한 샥스핀 스시와 삼색 샤시 참치 스시를 살사소스와 슥슥삭삭 샅샅이 비빈 것과 스위스산 소세지를 샤샤샥 싹쓸어 입속에 쑤셔넣어 살며시 삼키고 스산한 새벽 세시 삼십삼분 삼십삼초에 산림 숲속으로 사라졌다는 이야기.",
+    ],
+  },
+  en: {
+    easy: [
+      "The sun rises every morning.",
+      "She loves reading books by the fire.",
+      "Cats and dogs are popular pets.",
+      "Please pass me the salt and pepper.",
+      "The children played in the park today.",
+      "He drinks coffee every single morning.",
+      "We went to the beach last summer.",
+      "The sky is clear and bright today.",
+      "Birds sing outside my window at dawn.",
+      "I enjoy walking through the quiet forest.",
+    ],
+    normal: [
+      "The quick brown fox jumps over the lazy dog.",
+      "She discovered an old letter hidden inside the bookshelf.",
+      "Autumn leaves drifted slowly down from the tall oak trees.",
+      "He practiced the piano for hours every single evening.",
+      "The mountain trail was steep but the view was worth it.",
+      "A warm cup of tea makes any rainy afternoon better.",
+      "She smiled and waved goodbye before boarding the train.",
+      "The library was silent except for the soft turning of pages.",
+      "Every small act of kindness ripples outward in unexpected ways.",
+      "The city lights sparkled like stars reflected on the river.",
+    ],
+    hard: [
+      "The complexity of human consciousness defies any single scientific or philosophical explanation.",
+      "Technological advancement accelerates exponentially while our ethical frameworks struggle to keep pace.",
+      "Literature serves as a mirror reflecting the multifaceted nature of human experience across centuries.",
+      "Sustainable development requires reconciling economic imperatives with environmental stewardship and social equity.",
+      "The paradox of choice suggests that an abundance of options can paradoxically lead to dissatisfaction.",
+      "Quantum mechanics fundamentally challenges our intuitive understanding of reality at the subatomic level.",
+      "Democracy is not merely a system of government but a continuous practice of civic participation.",
+      "The interplay between nature and nurture shapes personality in ways still not fully understood.",
+      "Artificial intelligence raises profound questions about creativity, authorship, and the boundaries of human cognition.",
+      "Cultural diversity enriches global civilization yet simultaneously presents challenges to mutual understanding.",
+    ],
+    veryhard: [
+      "But Count Rastopchin, who now shamed those who were leaving, now evacuated government offices, now distributed good-for-nothing weapons among the drunken riffraff, now took up icons, now forbade Augustin to evacuate relics and icons, now confiscated all private carts, now transported the hot-air balloon constructed by Leppich on a hundred and thirty-six carts, now hinted that he would burn Moscow, now told how he had burned his own house and wrote a proclamation to the French in which he solemnly reproached them for destroying his orphanage; now he assumed the glory of having burned Moscow, now he renounced it, now he ordered the people to catch all the spies and bring them to him, now he reproached the people for it, now he banished all the French from Moscow, now he allowed Mme Aubert-Chalmet, the center of all the French population of all Moscow, to remain in the city and ordered the old and venerable postmaster general Klyucharev, who had done nothing particularly wrong, to be arrested and exiled; now he gathered the people on the Three Hills to fight the French, now, in order to be rid of those same people, he turned them loose to murder a man and escaped through a back gate himself; now he said he would not survive the misfortune of Moscow, now he wrote French verses in an album about his part in the affair—this man did not understand the meaning of the event that was taking place, but only wanted to do something himself, to astonish someone or other, to accomplish something patriotically heroic, and, like a boy, frolicked over the majestic and inevitable event of the abandoning and burning of Moscow, and tried with his little hand now to encourage, now to stem the flow of the enormous current of people which carried him along with it.",
+    ],
+  },
+};
+
+// ── 상태 ──────────────────────────────────────────────────────
+let lang = 'ko';
+let diff = 'easy';
+let sentences = [];
+let currentIndex = 0;
+let timer = null;
+let startTime = null;
+let timeLeft = 120;
+let totalChars = 0;
+let correctChars = 0;
+let typos = 0;
+let wpmPerSentence = [];
+let sentenceStartTime = null;
+let gameElapsed = 0; // actual elapsed seconds
+
+const TOTAL = 10;
+
+function getTotal() { return diff === 'veryhard' ? SENTENCES[lang].veryhard.length : TOTAL; }
+
+// ── Best 기록 (localStorage) ──────────────────────────────────
+function bestKey() { return `igtype_best_${lang}_${diff}`; }
+function getBest() { return parseInt(localStorage.getItem(bestKey())) || 0; }
+function saveBest(v) { if (v > getBest()) localStorage.setItem(bestKey(), v); }
+
+function updateBestBadge() {
+  const b = getBest();
+  const label = lang === 'ko' ? `베스트 ${b > 0 ? b + ' 타/분' : '—'}` : `Best ${b > 0 ? b + ' WPM' : '—'}`;
+  document.getElementById('bestDisplay').textContent = b > 0 ? (lang === 'ko' ? b + ' 타/분' : b + ' WPM') : '—';
+}
+
+// ── 화면 전환 ─────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── 시작 화면 이벤트 ──────────────────────────────────────────
+document.getElementById('langRow').addEventListener('click', e => {
+  const btn = e.target.closest('[data-lang]');
+  if (!btn) return;
+  lang = btn.dataset.lang;
+  document.querySelectorAll('[data-lang]').forEach(b => b.classList.toggle('active', b === btn));
+  updateBestBadge();
+});
+
+document.getElementById('diffRow').addEventListener('click', e => {
+  const btn = e.target.closest('[data-diff]');
+  if (!btn) return;
+  diff = btn.dataset.diff;
+  document.querySelectorAll('[data-diff]').forEach(b => b.classList.toggle('active', b === btn));
+  updateBestBadge();
+});
+
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('retryBtn').addEventListener('click', startGame);
+document.getElementById('backBtn').addEventListener('click', () => {
+  clearInterval(timer);
+  showScreen('screenStart');
+  updateBestBadge();
+});
+
+// ── 게임 시작 ─────────────────────────────────────────────────
+function startGame() {
+  const isVeryHard = diff === 'veryhard';
+  const pool = [...SENTENCES[lang][diff]];
+  sentences = isVeryHard ? pool : pool.sort(() => Math.random() - 0.5).slice(0, TOTAL);
+  currentIndex = 0;
+  totalChars = 0;
+  correctChars = 0;
+  typos = 0;
+  wpmPerSentence = [];
+  timeLeft = 90;
+  startTime = Date.now();
+  gameElapsed = 0;
+
+  updateBestBadge();
+  showScreen('screenGame');
+  document.getElementById('gameHint').textContent = diff === 'veryhard'
+    ? '💀 끝까지 완성하세요! 3분 안에 도전!'
+    : '문장을 완성하면 자동으로 넘어갑니다';
+  document.getElementById('timerDisplay').textContent = '1:30';
+  renderSentence();
+  startTimer();
+
+  const input = document.getElementById('typingInput');
+  input.value = '';
+  input.classList.remove('error');
+  input.focus();
+}
+
+// ── 타이머 ────────────────────────────────────────────────────
+function startTimer() {
+  clearInterval(timer);
+  timer = setInterval(() => {
+    timeLeft--;
+    gameElapsed++;
+    updateTimerDisplay();
+    updateLiveWpm();
+    if (timeLeft <= 0) endGame();
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timeLeft / 60);
+  const s = timeLeft % 60;
+  const el = document.getElementById('timerDisplay');
+  el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  el.classList.toggle('urgent', timeLeft <= 15);
+}
+
+// ── 문장 렌더링 ───────────────────────────────────────────────
+function renderSentence() {
+  sentenceStartTime = Date.now();
+  const sentence = sentences[currentIndex];
+  const el = document.getElementById('sentenceDisplay');
+  el.innerHTML = '';
+  el.style.fontSize = diff === 'veryhard' ? '14px' : '';
+  el.style.lineHeight = diff === 'veryhard' ? '2' : '';
+  for (let i = 0; i < sentence.length; i++) {
+    const span = document.createElement('span');
+    span.className = 'ch pending' + (i === 0 ? ' cursor-char' : '');
+    span.textContent = sentence[i];
+    el.appendChild(span);
+  }
+  const total = getTotal();
+  document.getElementById('progressText').textContent = diff === 'veryhard' ? '1 / 1' : `${currentIndex} / ${total}`;
+  document.getElementById('progressFill').style.width = diff === 'veryhard' ? '0%' : `${(currentIndex / total) * 100}%`;
+  document.getElementById('liveSentence').textContent = diff === 'veryhard' ? '1/1' : `${currentIndex + 1}/${total}`;
+}
+
+// ── 입력 처리 ─────────────────────────────────────────────────
+document.getElementById('typingInput').addEventListener('input', handleInput);
+
+function handleInput(e) {
+  const input = e.target;
+  const typed = input.value;
+  const sentence = sentences[currentIndex];
+  const spans = document.getElementById('sentenceDisplay').querySelectorAll('.ch');
+
+  let localCorrect = 0;
+  let hasError = false;
+
+  for (let i = 0; i < sentence.length; i++) {
+    spans[i].classList.remove('correct', 'wrong', 'pending', 'cursor-char');
+    if (i < typed.length) {
+      if (typed[i] === sentence[i]) {
+        spans[i].classList.add('correct');
+        localCorrect++;
+      } else {
+        spans[i].classList.add('wrong');
+        hasError = true;
+      }
+    } else {
+      spans[i].classList.add('pending');
+      if (i === typed.length) spans[i].classList.add('cursor-char');
+    }
+  }
+
+  input.classList.toggle('error', hasError);
+  updateLiveAcc(typed, sentence);
+
+  // 문장 완성 체크
+  if (typed === sentence) {
+    // 문장별 WPM 기록
+    const elapsed = (Date.now() - sentenceStartTime) / 1000 / 60;
+    const words = lang === 'ko' ? sentence.length / 2.5 : sentence.split(' ').length;
+    const sentWpm = Math.round(words / elapsed);
+    wpmPerSentence.push(sentWpm);
+
+    // 정확도 누적
+    totalChars += sentence.length;
+    correctChars += localCorrect;
+
+    input.value = '';
+    input.classList.remove('error');
+    currentIndex++;
+
+    // veryhard: 진행바 완성
+    if (diff === 'veryhard') {
+      document.getElementById('progressFill').style.width = '100%';
+    }
+
+    if (currentIndex >= getTotal()) {
+      endGame();
+    } else {
+      renderSentence();
+    }
+  }
+}
+
+function updateLiveAcc(typed, sentence) {
+  if (typed.length === 0) return;
+  let c = 0;
+  for (let i = 0; i < typed.length; i++) {
+    if (i < sentence.length && typed[i] === sentence[i]) c++;
+  }
+  const acc = Math.round((c / typed.length) * 100);
+  document.getElementById('liveAcc').textContent = `${acc}%`;
+}
+
+function updateLiveWpm() {
+  const elapsed = (Date.now() - startTime) / 1000 / 60;
+  if (elapsed < 0.05) return;
+  const words = lang === 'ko' ? correctChars / 2.5 : correctChars / 5;
+  const wpm = Math.round(words / elapsed);
+  document.getElementById('liveWpm').textContent = wpm;
+}
+
+// ── 게임 종료 ─────────────────────────────────────────────────
+function endGame() {
+  clearInterval(timer);
+  const elapsed = (Date.now() - startTime) / 1000;
+  const elapsedMin = elapsed / 60;
+
+  // WPM / 타수 계산
+  const chars = totalChars;
+  let wpm, speed;
+  if (lang === 'ko') {
+    speed = Math.round(chars / elapsedMin);
+    wpm = speed;
+  } else {
+    wpm = Math.round((chars / 5) / elapsedMin);
+    speed = wpm;
+  }
+
+  const acc = chars > 0 ? Math.round((correctChars / chars) * 100) : 100;
+
+  saveBest(speed);
+  const isRecord = speed >= getBest();
+
+  // 결과 화면 채우기
+  const diffLabel = { easy: '쉬움', normal: '보통', hard: '어려움', veryhard: '💀 최상' }[diff];
+  const langLabel = lang === 'ko' ? '한국어' : 'English';
+  document.getElementById('resultSub').textContent = `${langLabel} · ${diffLabel} 난이도`;
+
+  const badge = document.getElementById('resultBadge');
+  badge.textContent = isRecord ? '🎉 신기록!' : '완료';
+  badge.className = 'badge ' + (isRecord ? 'record' : 'normal');
+
+  document.getElementById('wpmLabel').textContent = lang === 'ko' ? '타수 (타/분)' : 'WPM';
+  document.getElementById('resultWpm').textContent = speed;
+  document.getElementById('resultWpmSub').textContent = isRecord ? '최고 기록 달성!' : `베스트 ${getBest()}`;
+
+  document.getElementById('resultAcc').textContent = acc + '%';
+  document.getElementById('resultAccSub').textContent = `${currentIndex}문장 완료`;
+
+  const mm = Math.floor(elapsed / 60);
+  const ss = Math.round(elapsed % 60);
+  document.getElementById('resultTime').textContent = `${mm}:${ss.toString().padStart(2, '0')}`;
+  document.getElementById('resultTimeSub').textContent = `${currentIndex}개 문장`;
+
+  document.getElementById('speedLabel').textContent = lang === 'ko' ? '완료 문장' : '완료 문장';
+  document.getElementById('resultSpeed').textContent = currentIndex;
+  document.getElementById('resultSpeedSub').textContent = `전체 ${getTotal()}문장 중`;
+
+  // 막대 그래프
+  const barsEl = document.getElementById('wpmBars');
+  barsEl.innerHTML = '';
+  const maxWpm = Math.max(...wpmPerSentence, 1);
+  wpmPerSentence.forEach((w, i) => {
+    const bar = document.createElement('div');
+    bar.className = 'bar-item' + (w === Math.max(...wpmPerSentence) ? ' active' : '');
+    bar.style.height = Math.max(8, Math.round((w / maxWpm) * 100)) + '%';
+    bar.title = `${i + 1}번: ${w} ${lang === 'ko' ? '타/분' : 'WPM'}`;
+    barsEl.appendChild(bar);
+  });
+
+  showScreen('screenResult');
+  updateBestBadge();
+}
+
+// ── 초기화 ────────────────────────────────────────────────────
+updateBestBadge();
+</script>
+</body>
+</html>
