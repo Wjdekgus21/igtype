@@ -1,0 +1,2 @@
+# igtype
+igrus project contest
