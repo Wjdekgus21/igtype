@@ -4,10 +4,10 @@
 
 ## 실행 방법
 
-별도 설치 없이 `index.html` 파일을 브라우저에서 바로 열면 됩니다.
+별도 설치 없이 `igtype html.html` 파일을 브라우저에서 바로 열면 됩니다.
 
 ```
-index.html 파일을 더블클릭
+igtype html.html 파일을 더블클릭
 또는
 Chrome / Edge / Safari 등 브라우저에 파일을 드래그 앤 드롭
 ```
@@ -18,7 +18,7 @@ Chrome / Edge / Safari 등 브라우저에 파일을 드래그 앤 드롭
 
 ```
 igtype/
-└── index.html   # 전체 게임 (HTML + CSS + JS 단일 파일)
+└── igtype html.html   # 전체 게임 (HTML + CSS + JS 단일 파일)
 └── README.md
 ```
 
